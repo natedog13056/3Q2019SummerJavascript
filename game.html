@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        canvas {
+            border: 1px solid blueviolet;
+            background-color: white;
+        }
+    </style>
+
+</head>
+
+<body onload="startGame()">
+    <script>
+        function startGame() {
+            myGameArea.start();
+            myGamePiece = new component(60, 30, "car.png", 10, 120, 'image');
+        }
+
+        var myGameArea = {
+            canvas: document.createElement("canvas"),
+            start: function () {
+                this.canvas.width = 480;
+                this.canvas.height = 270;
+                this.context = this.canvas.getContext("2d");
+                document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
+                this.keys = [];
+                document.addEventListener('keydown', function (event) {
+                    myGameArea.keys[event.keyCode] = (event.type == 'keydown');
+                });
+
+                document.addEventListener('keyup', function (event) {
+                    myGameArea.keys[event.keyCode] = (event.type == 'keydown');
+                });
+
+
+                this.interval = setInterval(updateGameArea, 20);
+            },
+            clear: function () {
+                this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+            }
+        }
+        function updateGameArea() {
+            myGameArea.clear();
+            this.changePos();
+            myGamePiece.newPos();
+            myGamePiece.update();
+
+        }
+        function changePos() {
+            myGamePiece.speed = 0;
+            myGamePiece.moveAngle = 0;
+
+            if (myGameArea.keys[38]) {
+                myGamePiece.speed = 1;
+            }
+            if (myGameArea.keys[40]) {
+                myGamePiece.speed = -1;
+            }
+            if (myGameArea.keys[39]) {
+                myGamePiece.moveAngle = 1;
+            }
+            if (myGameArea.keys[37]) {
+                myGamePiece.moveAngle = -1;
+            }
+        }
+        var myGamePiece;
+
+        function component(width, height, color, x, y, type) {
+            this.width = width;
+            this.height = height;
+            this.x = x;
+            this.y = y;
+            this.angle = 0;
+            this.type = type;
+
+            this.speed = 0;
+            this.moveAngle = 0;
+
+            this.newPos = function () {
+                this.angle += this.moveAngle * Math.PI / 180;
+                this.x += this.speed * Math.sin(this.angle);
+                this.y -= this.speed * Math.cos(this.angle);
+            }
+
+            this.update = function () {
+                ctx = myGameArea.context;
+
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+
+                if (type == "image") {
+                    this.image = new Image();
+                    this.image.src = color;
+                    ctx.drawImage(this.image, width / -2, height / -2, width, height);
+                } else {
+                    ctx.fillStyle = color;
+                    //ctx.fillRect(this.x, this.y, this.width, this.height);
+                    ctx.fillRect(width / -2, height / -2, width, height);
+                }
+                ctx.restore();
+            }
+        }
+    </script>
+</body>
+<img src="car.png" style="width:60px; height:30px;" />
+
+</html>
